@@ -15,6 +15,7 @@ class avl_tree
     public: 
         node* root = NULL;
 
+        int height (node*);
         node* insert(node*, int);
         node* remove(node*, int);
         node* search(node*, int);
@@ -78,9 +79,13 @@ int main()
 }
 
 
-node* avl_tree::insert(node* tree_node,int value)
+int avl_tree::height(node* tree_node)
 {
-    //TODO
+    return (tree_node == NULL ? -1 : tree_node->height);
+}
+
+node* avl_tree::insert(node* tree_node, int value)
+{
     if (tree_node == NULL) 
     {
         tree_node = new node();
@@ -89,7 +94,20 @@ node* avl_tree::insert(node* tree_node,int value)
         tree_node->height = 0;
         tree_node->left_node = tree_node->right_node = NULL;
     }
-    
+    else if (value < tree_node->key)
+    {
+        tree_node->left_node = insert(tree_node->left_node, value);
+    }
+    else
+    {
+        tree_node->right_node = insert(tree_node->right_node, value);
+    }
+
+    int left_height = height(tree_node->left_node);
+    int right_height = height(tree_node->right_node);
+
+    tree_node->height = (left_height >= right_height ? left_height : right_height) + 1;
+
     return tree_node;
 }
 
