@@ -1,10 +1,12 @@
 #include <iostream>
+#include <string>
 
 using namespace std;
 
 struct node 
 {
     int key;
+    string data;
     struct node *left_node;
     struct node *right_node;
     int height;
@@ -19,7 +21,7 @@ class avl_tree
         void cleanup(node*);
         void display(node*, int);
 
-        node* insert(node*, int);
+        node* insert(node*, int, string);
         node* remove(node*, int);
         node* search(node*, int);
 
@@ -32,7 +34,8 @@ class avl_tree
 int main() 
 {
     avl_tree avl;
-    int choice, value;
+    int choice, key;
+    string data;
 
     while (true)
     {   
@@ -50,26 +53,30 @@ int main()
         switch (choice)
         {
         case 1:
-            cout << "Digite o numero que deseja inserir: ";
-            cin >> value;
+            cout << "Digite o valor da chave que deseja inserir: ";
+            cin >> key;
+            cout << endl << "Digite o valor que deseja guardar nesse nó: ";
+            
+            cin.ignore();
+            getline(cin, data);
 
-            avl.root = avl.insert(avl.root, value);
+            avl.root = avl.insert(avl.root, key, data);
 
             break;
         
         case 2:
-            cout << "Digite o numero que deseja remover: ";
-            cin >> value;
+            cout << "Digite a chave que deseja remover: ";
+            cin >> key;
 
-            avl.root = avl.remove(avl.root ,value);
+            avl.root = avl.remove(avl.root ,key);
 
             break;
 
         case 3:
-            cout << "Digite o numero que deseja buscar: ";
-            cin >> value;
+            cout << "Digite a chave que deseja buscar: ";
+            cin >> key;
 
-            avl.search(avl.root, value);
+            avl.search(avl.root, key);
 
             break;
 
@@ -134,23 +141,24 @@ void avl_tree::cleanup(node* tree_node)
     delete tree_node;
 }
 
-node* avl_tree::insert(node* tree_node, int value)
+node* avl_tree::insert(node* tree_node, int key, string data)
 {
     if (tree_node == NULL) 
     {
         tree_node = new node();
 
-        tree_node->key = value;
+        tree_node->key = key;
+        tree_node->data = data;
         tree_node->height = 0;
         tree_node->left_node = tree_node->right_node = NULL;
     }
-    else if (value < tree_node->key)
+    else if (key < tree_node->key)
     {
-        tree_node->left_node = insert(tree_node->left_node, value);
+        tree_node->left_node = insert(tree_node->left_node, key, data);
     }
     else
     {
-        tree_node->right_node = insert(tree_node->right_node, value);
+        tree_node->right_node = insert(tree_node->right_node, key, data);
     }
 
     int left_height = height(tree_node->left_node);
@@ -161,13 +169,13 @@ node* avl_tree::insert(node* tree_node, int value)
     return tree_node;
 }
 
-node* avl_tree::remove(node* ,int value)
+node* avl_tree::remove(node* ,int key)
 {
     //TODO
     return NULL;
 }
 
-node* avl_tree::search(node* ,int value)
+node* avl_tree::search(node* ,int key)
 {
     //TODO
     return NULL;
