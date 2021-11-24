@@ -120,7 +120,7 @@ void avl_tree::display(node* tree_node, int level)
     }
 }
 
-// Liberar memória utilizada dinamicamente alocada com o operador new
+// Liberar memória dinamicamente alocada com o operador new
 void avl_tree::cleanup(node* tree_node) 
 {
     if (tree_node == NULL)
