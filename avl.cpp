@@ -15,13 +15,13 @@ class avl_tree
     public: 
         node* root = NULL;
 
-        void insert(int);
-        void remove(int);
-        void search(int);
-        void left_right_rotation();
-        void right_left_rotation();
-        void double_left_rotation();
-        void double_right_rotation();
+        node* insert(node*, int);
+        node* remove(node*, int);
+        node* search(node*, int);
+        node* single_left_rotation(node*);
+        node* single_right_rotation(node*);
+        node* double_left_rotation(node*);
+        node* double_right_rotation(node*);
 };
 
 int main() 
@@ -30,7 +30,7 @@ int main()
     int choice, value;
 
     while (true)
-    {
+    {   
         cout << "-----------------------------------" << endl;
         cout << "                AVL                " << endl;
         cout << "-----------------------------------" << endl;
@@ -47,7 +47,7 @@ int main()
             cout << "Digite o numero que deseja inserir: ";
             cin >> value;
 
-            avl.insert(value);
+            avl.root = avl.insert(avl.root, value);
 
             break;
         
@@ -55,7 +55,7 @@ int main()
             cout << "Digite o numero que deseja remover: ";
             cin >> value;
 
-            avl.remove(value);
+            avl.root = avl.remove(avl.root ,value);
 
             break;
 
@@ -63,7 +63,7 @@ int main()
             cout << "Digite o numero que deseja buscar: ";
             cin >> value;
 
-            avl.remove(value);
+            avl.search(avl.root, value);
 
             break;
 
@@ -77,38 +77,46 @@ int main()
     }
 }
 
-void avl_tree::insert(int value)
+
+node* avl_tree::insert(node* ,int value)
 {
     //TODO
+    return NULL;
 }
 
-void avl_tree::remove(int value)
+node* avl_tree::remove(node* ,int value)
 {
     //TODO
+    return NULL;
 }
 
-void avl_tree::search(int value)
+node* avl_tree::search(node* ,int value)
 {
     //TODO
+    return NULL;
 }
 
-void avl_tree::left_right_rotation()
+node* avl_tree::single_left_rotation(node*)
 {
     //TODO
+    return NULL;
 }
 
-void avl_tree::right_left_rotation()
+node* avl_tree::single_right_rotation(node*)
 {
     //TODO
+    return NULL;
 }
 
-void avl_tree::double_left_rotation()
+node* avl_tree::double_left_rotation(node*)
 {
     //TODO
+    return NULL;
 }
 
-void avl_tree::double_right_rotation()
+node* avl_tree::double_right_rotation(node*)
 {
     //TODO
+    return NULL;
 }
 
