@@ -16,9 +16,13 @@ class avl_tree
         node* root = NULL;
 
         int height (node*);
+        void cleanup(node*);
+        void display(node*, int);
+
         node* insert(node*, int);
         node* remove(node*, int);
         node* search(node*, int);
+
         node* single_left_rotation(node*);
         node* single_right_rotation(node*);
         node* double_left_rotation(node*);
@@ -38,7 +42,8 @@ int main()
         cout << "  1 - Inserir elemento na arvore" << endl;
         cout << "  2 - Remover elemento na arvore" << endl;
         cout << "  3 - Buscar elemento na arvore" << endl;
-        cout << "  4 - Encerrar o programa" << endl;
+        cout << "  4 - Mostrar a arvore" << endl;
+        cout << "  5 - Encerrar o programa" << endl;
 
         cin >> choice;
 
@@ -69,6 +74,13 @@ int main()
             break;
 
         case 4:
+            cout << "--------------Direita--------------" << endl;
+            avl.display(avl.root, 1);
+            cout << endl << endl << "--------------Esquerda-------------" << endl;
+            break;
+
+        case 5:
+            avl.cleanup(avl.root);
             return 0;
 
         default:
@@ -82,6 +94,44 @@ int main()
 int avl_tree::height(node* tree_node)
 {
     return (tree_node == NULL ? -1 : tree_node->height);
+}
+
+void avl_tree::display(node* tree_node, int level)
+{
+    if (tree_node != NULL)
+    {
+        display(tree_node->right_node, level + 1);
+
+        cout << endl;
+
+        if (tree_node == root) 
+        {
+            cout << "Root -> ";
+        }
+
+        for (int i = 0; i < level && tree_node != root; i++)
+        {
+            cout<<"        ";
+        }
+        
+        cout << tree_node->key;
+
+        display(tree_node->left_node, level + 1);
+    }
+}
+
+// Liberar memória utilizada dinamicamente alocada com o operador new
+void avl_tree::cleanup(node* tree_node) 
+{
+    if (tree_node == NULL)
+    {
+        return;
+    }
+
+    cleanup(tree_node->left_node);
+    cleanup(tree_node->right_node);
+
+    delete tree_node;
 }
 
 node* avl_tree::insert(node* tree_node, int value)
