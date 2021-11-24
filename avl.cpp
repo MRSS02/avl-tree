@@ -2,13 +2,13 @@
 
 using namespace std;
 
-typedef struct node 
+struct node 
 {
     int key;
     struct node *left_node;
     struct node *right_node;
     int height;
-} node;
+};
 
 class avl_tree
 {
@@ -78,10 +78,19 @@ int main()
 }
 
 
-node* avl_tree::insert(node* ,int value)
+node* avl_tree::insert(node* tree_node,int value)
 {
     //TODO
-    return NULL;
+    if (tree_node == NULL) 
+    {
+        tree_node = new node();
+
+        tree_node->key = value;
+        tree_node->height = 0;
+        tree_node->left_node = tree_node->right_node = NULL;
+    }
+    
+    return tree_node;
 }
 
 node* avl_tree::remove(node* ,int value)
