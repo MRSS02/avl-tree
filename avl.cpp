@@ -46,7 +46,8 @@ int main()
         cout << "  2 - Remover elemento na arvore" << endl;
         cout << "  3 - Buscar elemento na arvore" << endl;
         cout << "  4 - Mostrar a arvore" << endl;
-        cout << "  5 - Encerrar o programa" << endl;
+        cout << "  5 - Encerrar o programa" << endl << endl;
+        cout << "Escolha uma operação: ";
 
         cin >> choice;
 
@@ -94,6 +95,8 @@ int main()
             cout << "Opcao invalida" << endl;
             break;
         }
+
+        cout << endl;
     }
 }
 
@@ -113,7 +116,7 @@ void avl_tree::display(node* tree_node, int level)
 
         if (tree_node == root) 
         {
-            cout << "Root -> ";
+            cout << "Raiz -> ";
         }
 
         for (int i = 0; i < level && tree_node != root; i++)
