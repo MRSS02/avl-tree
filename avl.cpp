@@ -7,8 +7,9 @@ struct node
 {
     int key;
     string data;
-    struct node *left_node;
-    struct node *right_node;
+    struct node* parent_node;
+    struct node* left_node;
+    struct node* right_node;
     int height;
 };
 
@@ -168,10 +169,12 @@ node* avl_tree::insert(node* tree_node, int key, string data)
     else if (key < tree_node->key)
     {
         tree_node->left_node = insert(tree_node->left_node, key, data);
+        tree_node->left_node->parent_node = tree_node;
     }
     else
     {
         tree_node->right_node = insert(tree_node->right_node, key, data);
+        tree_node->right_node->parent_node = tree_node;
     }
 
     int left_height = height(tree_node->left_node);
@@ -190,7 +193,6 @@ node* avl_tree::remove(node* ,int key)
 
 node* avl_tree::search(node* tree_node, int key)
 {
-    //TODO
     if (tree_node == NULL)
     {
         return NULL;
