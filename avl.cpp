@@ -7,8 +7,9 @@ struct node
 {
     int key;
     string data;
-    struct node *left_node;
-    struct node *right_node;
+    struct node* parent_node;
+    struct node* left_node;
+    struct node* right_node;
     int height;
 };
 
@@ -36,9 +37,14 @@ int main()
     avl_tree avl;
     int choice, key;
     string data;
+    node* found = NULL;
 
     while (true)
     {   
+        choice = key = 0;
+        data = "";
+        found = NULL;
+
         cout << "-----------------------------------" << endl;
         cout << "                AVL                " << endl;
         cout << "-----------------------------------" << endl;
@@ -77,7 +83,15 @@ int main()
             cout << "Digite a chave que deseja buscar: ";
             cin >> key;
 
-            avl.search(avl.root, key);
+            found = avl.search(avl.root, key);
+            if (found == NULL)
+            {
+                cout << "O nó não foi encontrado" << endl;
+            }
+            else
+            {
+                cout << "O nó " << key << " guardava o valor " << found->data << "."; 
+            }
 
             break;
 
@@ -158,10 +172,12 @@ node* avl_tree::insert(node* tree_node, int key, string data)
     else if (key < tree_node->key)
     {
         tree_node->left_node = insert(tree_node->left_node, key, data);
+        tree_node->left_node->parent_node = tree_node;
     }
     else
     {
         tree_node->right_node = insert(tree_node->right_node, key, data);
+        tree_node->right_node->parent_node = tree_node;
     }
 
     int left_height = height(tree_node->left_node);
@@ -178,10 +194,24 @@ node* avl_tree::remove(node* ,int key)
     return NULL;
 }
 
-node* avl_tree::search(node* ,int key)
+node* avl_tree::search(node* tree_node, int key)
 {
-    //TODO
-    return NULL;
+    if (tree_node == NULL)
+    {
+        return NULL;
+    }
+    else if (tree_node->key == key)
+    {
+        return tree_node;
+    }
+    else if (key > tree_node->key)
+    {
+        return search(tree_node->right_node, key);
+    }
+    else 
+    {
+        return search(tree_node->left_node, key);
+    }
 }
 
 node* avl_tree::single_left_rotation(node*)
