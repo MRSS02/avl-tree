@@ -24,7 +24,7 @@ class avl_tree
         void display(node*, int);
 
         node* insert(node*, int, string);
-        node* remove(node*, int);
+        node* remove(node*, node*, bool);
         node* search(node*, int);
 
         node* single_left_rotation(node*);
@@ -72,16 +72,18 @@ int main()
 
             break;
 
-        case 2:
-            cout << "Digite a chave que deseja remover: ";
+        case 2: 
+        {
+            cout << "Digite a chave do nó que deseja remover: ";
             cin >> key;
 
-            avl.root = avl.remove(avl.root ,key);
-
+            node* to_remove = avl.search(avl.root, key);
+            avl.root = avl.remove(to_remove, avl.root, true);
+        }
             break;
-
-        case 3:
-            cout << "Digite a chave que deseja buscar: ";
+        
+        case 3: 
+            cout << "Digite a chave do nó que deseja buscar: ";
             cin >> key;
 
             found = avl.search(avl.root, key);
@@ -91,7 +93,7 @@ int main()
             }
             else
             {
-                cout << "O nó " << key << " guardava o valor " << found->data << ".";
+                cout << "O nó " << key << " guarda o valor " << found->data << ".";
             }
 
             break;
@@ -111,7 +113,7 @@ int main()
             break;
         }
 
-        cout << endl;
+        cout << endl << endl;
     }
 }
 
@@ -285,10 +287,41 @@ node* avl_tree::insert(node* tree_node, int key, string data)
     return tree_node;
 }
 
-node* avl_tree::remove(node* ,int key)
+node* avl_tree::remove(node* to_remove, node* root, bool needs_to_free)
 {
     //TODO
-    return NULL;
+    if (to_remove->right_node == NULL && to_remove->left_node != NULL) { 
+        if (to_remove == root) root = to_remove->left_node;
+        else to_remove->left_node->parent_node = to_remove->parent_node;
+        to_remove->parent_node->left_node = to_remove->left_node;
+        
+    } else {
+        if (to_remove->left_node == NULL && to_remove->right_node != NULL) { 
+            if (to_remove == root) root = to_remove->left_node;
+            else to_remove->right_node->parent_node = to_remove->parent_node;
+            to_remove->parent_node->right_node = to_remove->right_node;
+        } else {
+            node* replacement_node = to_remove->right_node;
+            find_replacement:
+            while (replacement_node->left_node != NULL) 
+                replacement_node = replacement_node->left_node;
+            if (replacement_node->right_node != NULL) 
+                replacement_node = replacement_node->right_node;
+            if (replacement_node->left_node != NULL) goto find_replacement;
+            remove(replacement_node, root, false); 
+            if (to_remove == root) root = replacement_node;
+            else {
+                if (to_remove->parent_node->left_node == to_remove) to_remove->parent_node->left_node == replacement_node;
+                else to_remove->parent_node->right_node == replacement_node;
+            }
+            replacement_node->left_node = to_remove->left_node;
+            replacement_node->right_node = to_remove->right_node;
+        }
+    }
+
+    if (needs_to_free) free(to_remove);
+
+    return root;
 }
 
 node* avl_tree::search(node* tree_node, int key)
