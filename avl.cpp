@@ -63,12 +63,14 @@ int main()
         case 1:
             cout << "Digite o valor da chave que deseja inserir: ";
             cin >> key;
-            cout << endl << "Digite o valor que deseja guardar nesse nó: ";
+            found = avl.search(avl.root, key);
+            if (found == NULL) {
+                cout << endl << "Digite o valor que deseja guardar nesse nó: ";
 
-            cin.ignore();
-            getline(cin, data);
-
-            avl.root = avl.insert(avl.root, key, data);
+                cin.ignore();
+                getline(cin, data);
+                avl.root = avl.insert(avl.root, key, data);
+            } else cout << "O nó " << key << " já se encontra na árvore.";
 
             break;
 
@@ -77,8 +79,10 @@ int main()
             cout << "Digite a chave do nó que deseja remover: ";
             cin >> key;
 
-            node* to_remove = avl.search(avl.root, key);
-            avl.root = avl.remove(to_remove, avl.root, true);
+            found = avl.search(avl.root, key);
+            avl.root = avl.remove(found, avl.root, true);
+            if (found == NULL) cout << "O nó " << key << " não foi encontrado.";
+            cout << "O nó " << key << " foi removido com sucesso.";
         }
             break;
         
@@ -89,7 +93,7 @@ int main()
             found = avl.search(avl.root, key);
             if (found == NULL)
             {
-                cout << "O nó não foi encontrado" << endl;
+                cout << "O nó " << key << " não foi encontrado." << endl;
             }
             else
             {
@@ -289,37 +293,54 @@ node* avl_tree::insert(node* tree_node, int key, string data)
 
 node* avl_tree::remove(node* to_remove, node* root, bool needs_to_free)
 {
-    //TODO
-    if (to_remove->right_node == NULL && to_remove->left_node != NULL) { 
-        if (to_remove == root) root = to_remove->left_node;
-        else to_remove->left_node->parent_node = to_remove->parent_node;
-        to_remove->parent_node->left_node = to_remove->left_node;
-        
-    } else {
-        if (to_remove->left_node == NULL && to_remove->right_node != NULL) { 
-            if (to_remove == root) root = to_remove->left_node;
-            else to_remove->right_node->parent_node = to_remove->parent_node;
-            to_remove->parent_node->right_node = to_remove->right_node;
-        } else {
-            node* replacement_node = to_remove->right_node;
-            find_replacement:
-            while (replacement_node->left_node != NULL) 
-                replacement_node = replacement_node->left_node;
-            if (replacement_node->right_node != NULL) 
-                replacement_node = replacement_node->right_node;
-            if (replacement_node->left_node != NULL) goto find_replacement;
-            remove(replacement_node, root, false); 
-            if (to_remove == root) root = replacement_node;
-            else {
-                if (to_remove->parent_node->left_node == to_remove) to_remove->parent_node->left_node == replacement_node;
-                else to_remove->parent_node->right_node == replacement_node;
-            }
-            replacement_node->left_node = to_remove->left_node;
-            replacement_node->right_node = to_remove->right_node;
-        }
-    }
 
-    if (needs_to_free) free(to_remove);
+    if (to_remove != NULL) 
+        if (to_remove->left_node == NULL && to_remove->right_node != NULL) {
+            if (to_remove == root) {
+                to_remove->left_node->parent_node = NULL;
+                root = to_remove->left_node;
+            } else {
+                to_remove->left_node->parent_node = to_remove->parent_node;
+                to_remove->parent_node->left_node = to_remove->left_node;
+            }
+        } else {
+            if (to_remove->right_node == NULL && to_remove->left_node != NULL) { 
+                if (to_remove == root) {
+                    to_remove->left_node->parent_node = NULL;
+                    root = to_remove->left_node;
+                } else {
+                    to_remove->left_node->parent_node = to_remove->parent_node;
+                    to_remove->parent_node->left_node = to_remove->left_node;
+                }
+            } else {
+                if (to_remove->left_node == NULL && to_remove->right_node != NULL) { 
+                    if (to_remove == root) {
+                        to_remove->right_node->parent_node = NULL;
+                        root = to_remove->right_node;
+                    } else {
+                        to_remove->right_node->parent_node = to_remove->parent_node;
+                        to_remove->parent_node->right_node = to_remove->right_node;
+                    }
+                } else {
+                    node* replacement_node = to_remove->right_node;
+                    find_replacement:
+                    while (replacement_node->left_node != NULL) 
+                        replacement_node = replacement_node->left_node;
+                    if (replacement_node->right_node != NULL) 
+                        replacement_node = replacement_node->right_node;
+                    if (replacement_node->left_node != NULL) goto find_replacement;
+                    remove(replacement_node, root, false); 
+                    if (to_remove == root) root = replacement_node;
+                    else {
+                        if (to_remove->parent_node->left_node == to_remove) to_remove->parent_node->left_node == replacement_node;
+                        else to_remove->parent_node->right_node == replacement_node;
+                    }
+                    replacement_node->left_node = to_remove->left_node;
+                    replacement_node->right_node = to_remove->right_node;
+                }
+            }
+        } 
+        if (needs_to_free) free(to_remove);
 
     return root;
 }
