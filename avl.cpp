@@ -24,7 +24,7 @@ class avl_tree
         void display(node*, int);
 
         node* insert(node*, int, string);
-        node* remove(node*, int);
+        node* remove(node*, node*, bool);
         node* search(node*, int);
 
         node* single_left_rotation(node*);
@@ -50,10 +50,11 @@ int main()
         cout << "                AVL                " << endl;
         cout << "-----------------------------------" << endl;
         cout << "  1 - Inserir elemento na arvore" << endl;
-        cout << "  2 - Remover elemento na arvore" << endl;
+        cout << "  2 - Remover elemento da arvore" << endl;
         cout << "  3 - Buscar elemento na arvore" << endl;
         cout << "  4 - Mostrar a arvore" << endl;
-        cout << "  5 - Encerrar o programa" << endl;
+        cout << "  5 - Encerrar o programa" << endl << endl;
+        cout << "Escolha uma operacao: ";
 
         cin >> choice;
 
@@ -62,35 +63,41 @@ int main()
         case 1:
             cout << "Digite o valor da chave que deseja inserir: ";
             cin >> key;
-            cout << endl << "Digite o valor que deseja guardar nesse nó: ";
+            found = avl.search(avl.root, key);
+            if (found == NULL) {
+                cout << endl << "Digite o dado que deseja guardar nesse no: ";
 
-            cin.ignore();
-            getline(cin, data);
-
-            avl.root = avl.insert(avl.root, key, data);
+                cin.ignore();
+                getline(cin, data);
+                avl.root = avl.insert(avl.root, key, data);
+            } else cout << "O no " << key << " ja se encontra na árvore.";
 
             break;
 
-        case 2:
-            cout << "Digite a chave que deseja remover: ";
+        case 2: 
+        {
+            cout << "Digite a chave do no que deseja remover: ";
             cin >> key;
 
-            avl.root = avl.remove(avl.root ,key);
-
+            found = avl.search(avl.root, key);
+            avl.root = avl.remove(found, avl.root, true);
+            if (found == NULL) cout << "O no " << key << " não foi encontrado.";
+            else cout << "O no " << key << " foi removido com sucesso.";
+        }
             break;
-
-        case 3:
-            cout << "Digite a chave que deseja buscar: ";
+        
+        case 3: 
+            cout << "Digite a chave do no que deseja buscar: ";
             cin >> key;
 
             found = avl.search(avl.root, key);
             if (found == NULL)
             {
-                cout << "O nó não foi encontrado" << endl;
+                cout << "O no " << key << " nao foi encontrado.";
             }
             else
             {
-                cout << "O nó " << key << " guardava o valor " << found->data << ".";
+                cout << "O no " << key << " guarda o valor " << found->data << ".";
             }
 
             break;
@@ -106,9 +113,11 @@ int main()
             return 0;
 
         default:
-            cout << "Opcao invalida" << endl;
+            cout << "Operacao invalida";
             break;
         }
+
+        cout << endl << endl;
     }
 }
 
@@ -128,7 +137,7 @@ void avl_tree::display(node* tree_node, int level)
 
         if (tree_node == root)
         {
-            cout << "Root -> ";
+            cout << "Raiz -> ";
         }
 
         for (int i = 0; i < level && tree_node != root; i++)
@@ -156,20 +165,27 @@ void avl_tree::cleanup(node* tree_node)
     delete tree_node;
 }
 
-// A utility function to get the
-// height of the tree
-int height(node *N)
+// // A utility function to get the
+// // height of the tree
+int height(node *tree_node)
 {
-    if (N == NULL)
+    if (tree_node == NULL)
         return 0;
-    return N->height;
+    return tree_node->height;
 }
 
 // A utility function to get maximum
 // of two integers
-int max(int a, int b)
+// int max(int a, int b)
+// {
+//     return (a > b)? a : b;
+// }
+
+int getHeight(node *tree_node) 
 {
-    return (a > b)? a : b;
+    int left_height = height(tree_node->left_node);
+    int right_height = height(tree_node->right_node);
+    return (left_height >= right_height ? left_height : right_height) + 1;
 }
 
 // A utility function to right
@@ -181,14 +197,14 @@ node *rightRotate(node *y)
     node *T2 = x->right_node;
 
     // Perform rotation
-    x->right_node = y;
+    if (x != NULL) x->right_node = y;
+    y->parent_node = x;
     y->left_node = T2;
+    if (T2 != NULL) T2->parent_node = y;
 
     // Update heights
-    y->height = max(height(y->left_node),
-                    height(y->right_node)) + 1;
-    x->height = max(height(x->left_node),
-                    height(x->right_node)) + 1;
+    y->height = getHeight(y);
+    x->height = getHeight(x);
 
     // Return new root
     return x;
@@ -203,24 +219,24 @@ node *leftRotate(node *x)
     node *T2 = y->left_node;
 
     // Perform rotation
-    y->left_node = x;
+    if (y != NULL) y->left_node = x;
+    x->parent_node = y;
     x->right_node = T2;
+    if (T2 != NULL) T2->parent_node = x;
 
     // Update heights
-    x->height = max(height(x->left_node),
-                    height(x->right_node)) + 1;
-    y->height = max(height(y->left_node),
-                    height(y->right_node)) + 1;
+    x->height = getHeight(x);
+    y->height = getHeight(y);
 
     // Return new root
     return y;
 }
 
-int getBalance(node *N)
+int getBalance(node *tree_node)
 {
-    if (N == NULL)
+    if (tree_node == NULL)
         return 0;
-    return height(N->left_node) - height(N->right_node);
+    return height(tree_node->left_node) - height(tree_node->right_node);
 }
 
 node* avl_tree::insert(node* tree_node, int key, string data)
@@ -245,34 +261,31 @@ node* avl_tree::insert(node* tree_node, int key, string data)
         tree_node->right_node->parent_node = tree_node;
     }
 
-    int left_height = height(tree_node->left_node);
-    int right_height = height(tree_node->right_node);
-
-    tree_node->height = (left_height >= right_height ? left_height : right_height) + 1;
+    tree_node->height = getHeight(tree_node);
 
     int balance = getBalance(tree_node);
     // If this node becomes unbalanced, then
     // there are 4 cases
 
     // Left Left Case
-    if (balance > 1 && key < tree_node->left_node->key)
+    if (balance > 1 && tree_node->left_node != NULL && key < tree_node->left_node->key)
     {
         return rightRotate(tree_node);
     }
     // Right Right Case
-    if (balance < -1 && key > tree_node->right_node->key)
+    if (balance < -1 && tree_node->right_node != NULL && key > tree_node->right_node->key)
     {
         return leftRotate(tree_node);
     }
     // Left Right Case
-    if (balance > 1 && key > tree_node->left_node->key)
+    if (balance > 1 && tree_node->left_node != NULL && key > tree_node->left_node->key)
     {
         tree_node->left_node = leftRotate(tree_node->left_node);
         return rightRotate(tree_node);
     }
 
     // Right Left Case
-    if (balance < -1 && key < tree_node->right_node->key)
+    if (balance < -1 && tree_node->right_node != NULL && key < tree_node->right_node->key)
     {
         tree_node->right_node = rightRotate(tree_node->right_node);
         return leftRotate(tree_node);
@@ -282,10 +295,62 @@ node* avl_tree::insert(node* tree_node, int key, string data)
     return tree_node;
 }
 
-node* avl_tree::remove(node* ,int key)
+node* avl_tree::remove(node* to_remove, node* root, bool needs_to_free)
 {
-    //TODO
-    return NULL;
+
+    if (to_remove != NULL) 
+        if (to_remove->left_node == NULL && to_remove->right_node == NULL) {
+            if (to_remove == root) {
+                root = NULL;
+            } else {
+                if (to_remove->parent_node->left_node == to_remove)
+                    to_remove->parent_node->left_node = NULL;
+                else to_remove->parent_node->right_node = NULL;
+
+            }
+        } else {
+            if (to_remove->right_node == NULL && to_remove->left_node != NULL) { 
+                if (to_remove == root) {
+                    to_remove->left_node->parent_node = NULL;
+                    root = to_remove->left_node;
+                } else {
+                    to_remove->left_node->parent_node = to_remove->parent_node;
+                    if (to_remove->parent_node->left_node == to_remove)
+                        to_remove->parent_node->left_node = to_remove->left_node;
+                    else to_remove->parent_node->right_node = to_remove->left_node;
+
+                }
+            } else {
+                if (to_remove->left_node == NULL && to_remove->right_node != NULL) { 
+                    if (to_remove == root) {
+                        to_remove->right_node->parent_node = NULL;
+                        root = to_remove->right_node;
+                    } else {
+                        to_remove->right_node->parent_node = to_remove->parent_node;
+                        if (to_remove->parent_node->left_node == to_remove)
+                            to_remove->parent_node->left_node = to_remove->right_node;
+                        else to_remove->parent_node->right_node = to_remove->right_node;
+                    }
+                } else {
+                    node* replacement_node = to_remove->right_node;
+                    while (replacement_node->left_node != NULL) 
+                        replacement_node = replacement_node->left_node;
+                    remove(replacement_node, root, false); 
+                    if (to_remove == root) root = replacement_node;
+                    else {
+                        replacement_node->parent_node = to_remove->parent_node;
+                        if (to_remove->parent_node->left_node == to_remove) to_remove->parent_node->left_node = replacement_node;
+                        else to_remove->parent_node->right_node = replacement_node;
+                    }
+                    replacement_node->left_node = to_remove->left_node;
+                    replacement_node->right_node = to_remove->right_node;
+                    
+                }
+            }
+        } 
+        if (needs_to_free) free(to_remove);
+
+    return root;
 }
 
 node* avl_tree::search(node* tree_node, int key)
