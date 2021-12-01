@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <limits>
 
 using namespace std;
 
@@ -57,12 +58,33 @@ int main()
         cout << "Escolha uma operacao: ";
 
         cin >> choice;
+        if (cin.fail())
+        {
+            cout << "Opcao invalida" << endl;
+
+            cin.clear();
+
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            continue;
+        }
 
         switch (choice)
         {
         case 1:
             cout << "Digite o valor da chave que deseja inserir: ";
             cin >> key;
+            
+            if (cin.fail())
+            {
+                cout << "Opcao invalida, por favor insira um numero inteiro" << endl;
+
+                cin.clear();
+                cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                break;
+            }
+
             found = avl.search(avl.root, key);
             if (found == NULL) {
                 cout << endl << "Digite o dado que deseja guardar nesse no: ";
@@ -78,6 +100,17 @@ int main()
         {
             cout << "Digite a chave do no que deseja remover: ";
             cin >> key;
+            
+            if (cin.fail())
+            {
+                cout << "Opcao invalida" << endl;
+
+                cin.clear();
+            
+                cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                break;
+            }
 
             found = avl.search(avl.root, key);
             avl.root = avl.remove(found, avl.root, true);
