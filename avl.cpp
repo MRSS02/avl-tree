@@ -25,8 +25,9 @@ class avl_tree
         void display(node*, int);
 
         node* insert(node*, int, string);
-        node* remove(node*, node*, bool);
+        node* remove(node*, node*);
         node* search(node*, int);
+        node* balance(node*, int);
 
         node* single_left_rotation(node*);
         node* single_right_rotation(node*);
@@ -92,6 +93,7 @@ int main()
                 cin.ignore();
                 getline(cin, data);
                 avl.root = avl.insert(avl.root, key, data);
+                cout << "O no " << key << " foi inserido com sucesso.";
             } else cout << "O no " << key << " ja se encontra na árvore.";
 
             break;
@@ -113,7 +115,7 @@ int main()
             }
 
             found = avl.search(avl.root, key);
-            avl.root = avl.remove(found, avl.root, true);
+            avl.root = avl.remove(found, avl.root);
             if (found == NULL) cout << "O no " << key << " não foi encontrado.";
             else cout << "O no " << key << " foi removido com sucesso.";
         }
@@ -136,13 +138,18 @@ int main()
             break;
 
         case 4:
-            cout << "--------------Direita--------------" << endl;
-            avl.display(avl.root, 1);
-            cout << endl << endl << "--------------Esquerda-------------" << endl;
+
+            if (avl.root == NULL) cout << "A arvore esta vazia."; 
+            else {
+                cout << "--------------Direita--------------" << endl;
+                avl.display(avl.root, 1);
+                cout << endl << endl << "--------------Esquerda-------------" << endl;
+            }
             break;
 
         case 5:
             avl.cleanup(avl.root);
+            cout << "Abortado.\n";
             return 0;
 
         default:
@@ -274,28 +281,36 @@ int getBalance(node *tree_node)
 
 node* avl_tree::insert(node* tree_node, int key, string data)
 {
-    if (tree_node == NULL)
+
+    if (tree_node == NULL) 
     {
         tree_node = new node();
-
         tree_node->key = key;
         tree_node->data = data;
         tree_node->height = 0;
         tree_node->left_node = tree_node->right_node = NULL;
+
     }
     else if (key < tree_node->key)
     {
         tree_node->left_node = insert(tree_node->left_node, key, data);
         tree_node->left_node->parent_node = tree_node;
     }
-    else
+    else 
     {
         tree_node->right_node = insert(tree_node->right_node, key, data);
         tree_node->right_node->parent_node = tree_node;
     }
 
-    tree_node->height = getHeight(tree_node);
+    if (tree_node != NULL) {
+        tree_node->height = getHeight(tree_node);
+        tree_node = balance(tree_node, key);
+    }
+    // retorna o Nó não modificado.
+    return tree_node;
+}
 
+node* avl_tree::balance(node* tree_node, int key) {
     int balance = getBalance(tree_node);
     // If this node becomes unbalanced, then
     // there are 4 cases
@@ -324,13 +339,12 @@ node* avl_tree::insert(node* tree_node, int key, string data)
         return leftRotate(tree_node);
     }
 
-    // retorna o Nó não modificado.
     return tree_node;
 }
 
-node* avl_tree::remove(node* to_remove, node* root, bool needs_to_free)
+node* avl_tree::remove(node* to_remove, node* root)
 {
-
+    
     if (to_remove != NULL) 
         if (to_remove->left_node == NULL && to_remove->right_node == NULL) {
             if (to_remove == root) {
@@ -368,7 +382,16 @@ node* avl_tree::remove(node* to_remove, node* root, bool needs_to_free)
                     node* replacement_node = to_remove->right_node;
                     while (replacement_node->left_node != NULL) 
                         replacement_node = replacement_node->left_node;
-                    remove(replacement_node, root, false); 
+                    if (replacement_node->right_node != NULL) {
+                        replacement_node->right_node->parent_node = replacement_node->parent_node;
+                        if (replacement_node->parent_node->left_node == replacement_node)
+                            replacement_node->parent_node->left_node = replacement_node->right_node;
+                        else replacement_node->parent_node->right_node = replacement_node->right_node;
+                    } else {
+                        if (replacement_node->parent_node->left_node == replacement_node)
+                        replacement_node->parent_node->left_node = NULL;
+                        else replacement_node->parent_node->right_node = NULL;
+                    }
                     if (to_remove == root) root = replacement_node;
                     else {
                         replacement_node->parent_node = to_remove->parent_node;
@@ -381,7 +404,19 @@ node* avl_tree::remove(node* to_remove, node* root, bool needs_to_free)
                 }
             }
         } 
-        if (needs_to_free) free(to_remove);
+
+            free(to_remove);
+
+            //fazer as rotações
+            node* lowest_left = root;
+            node* lowest_right = root;
+            while (lowest_left->left_node != NULL) lowest_left = lowest_left->left_node;
+            if (lowest_left->right_node != NULL) lowest_left = lowest_left->right_node;
+            while (lowest_right->right_node != NULL) lowest_right = lowest_right->right_node;
+            if (lowest_right->left_node != NULL) lowest_right = lowest_right->left_node;
+            search(root, lowest_left->key);
+            search(root, lowest_right->key);
+
 
     return root;
 }
@@ -392,18 +427,27 @@ node* avl_tree::search(node* tree_node, int key)
     {
         return NULL;
     }
-    else if (tree_node->key == key)
-    {
-        return tree_node;
+    else {
+        
+        if (tree_node->key == key)
+        {
+            // essa parte comentada que tá me dando problema - se eu mando balancear após buscar, caso não precise de 
+            // balanceamento ele deixa quieto, como deveria; mas caso precise, ele simplesmente remove da árvore todos os nós que 
+            // ele encontrou recursivamente até chegar no nó buscado, inclusive o próprio nó - o que é bizarro;   
+            // tree_node->height = getHeight(tree_node);
+            // tree_node = balance(tree_node, key);
+            return tree_node;
+        }
+        else if (key > tree_node->key)
+        {
+            return search(tree_node->right_node, key);
+        }
+        else
+        {
+            return search(tree_node->left_node, key);
+        }
     }
-    else if (key > tree_node->key)
-    {
-        return search(tree_node->right_node, key);
-    }
-    else
-    {
-        return search(tree_node->left_node, key);
-    }
+    
 }
 
 node* avl_tree::single_left_rotation(node*)
