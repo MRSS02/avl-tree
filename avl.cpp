@@ -286,17 +286,34 @@ node *avl_tree::remove(node *tree_node, int key)
         }
         else
         {
-            if (tree_node->parent_node->key < key)
+            if (tree_node == root)
+            {
+                tree_node->right_node->parent_node = NULL;
+                node *left = tree_node->left_node;
+                node *right = tree_node->right_node;
+
+                delete tree_node;
+                return append_and_balance(right, left);
+            }
+            else if (tree_node->parent_node->key < key)
             {
                 tree_node->parent_node->right_node = tree_node->right_node;
 
-                return append_and_balance(tree_node->right_node, tree_node->left_node);
+                node *left = tree_node->left_node;
+                node *right = tree_node->right_node;
+
+                delete tree_node;
+                return append_and_balance(right, left);
             }
             else
             {
                 tree_node->parent_node->left_node = tree_node->right_node;
 
-                return append_and_balance(tree_node->right_node, tree_node->left_node);
+                node *left = tree_node->left_node;
+                node *right = tree_node->right_node;
+
+                delete tree_node;
+                return append_and_balance(right, left);
             }
         }
     }
@@ -312,7 +329,7 @@ node *avl_tree::append_and_balance(node *tree_node, node *node_to_append)
     }
 
     tree_node->left_node = balance_node(append_and_balance(tree_node->left_node, node_to_append));
-    return tree_node;
+    return balance_node(tree_node);
 }
 
 node *avl_tree::search(node *tree_node, int key)
@@ -335,14 +352,17 @@ node *avl_tree::search(node *tree_node, int key)
     }
 }
 
-int avl_tree::balance_factor(node * tree_node)
+int avl_tree::balance_factor(node *tree_node)
 {
     if (tree_node == NULL)
     {
         return 0;
     }
 
-    return height(tree_node->left_node) - height(tree_node->right_node);
+    int left = height(tree_node->left_node);
+    int right = height(tree_node->right_node);
+
+    return left - right;
 }
 
 node *avl_tree::balance_node(node *tree_node)
@@ -351,10 +371,10 @@ node *avl_tree::balance_node(node *tree_node)
     int left_balance = balance_factor(tree_node->left_node);
     int right_balance = balance_factor(tree_node->right_node);
 
-    if (balance > 1 && left_balance > 0)
+    if (balance > 1 && left_balance >= 0)
         return single_right_rotation(tree_node);
 
-    if (balance < -1 && right_balance < 0)
+    if (balance < -1 && right_balance <= 0)
         return single_left_rotation(tree_node);
 
     if (balance > 1 && left_balance < 0)
